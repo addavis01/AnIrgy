@@ -54,5 +54,5 @@ if st.button("Get Charging Advice") and zip_code and utility_company:
             {"role": "user", "content": prompt},
         ],
     )
-    st.markdown("###🔋Here is your certified AnIgery Charging Recommendation")
+    st.markdown("🔋Here is your certified AnIrgy Charging Recommendation")
     st.write(response.choices[0].message.content)
