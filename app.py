@@ -12,7 +12,7 @@ st.title("🔋 AnIrgy EV Charging Advisor")
 # Inputs
 zip_code = st.text_input("Enter your ZIP code")
 utility_company = st.text_input("Enter your utility company name")
-ev make model = st.text_input("Enter your EV Make and Model")
+ev_make_model = st.text_input("Enter your EV Make and Model")
 battery_kwh = st.slider("How many kWh do you need to charge?", 10, 100, 30)
 charging_rate = st.number_input("Charging rate (kW)", value=11.5)
 rate_off_peak = st.number_input("Off-Peak rate ($/kWh)", value=0.15)
