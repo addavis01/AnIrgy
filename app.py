@@ -12,6 +12,7 @@ st.title("🔋 AnIrgy EV Charging Advisor")
 # Inputs
 zip_code = st.text_input("Enter your ZIP code")
 utility_company = st.text_input("Enter your utility company name")
+ev make model = st.text_input("Enter your EV Make and Model")
 battery_kwh = st.slider("How many kWh do you need to charge?", 10, 100, 30)
 charging_rate = st.number_input("Charging rate (kW)", value=11.5)
 rate_off_peak = st.number_input("Off-Peak rate ($/kWh)", value=0.15)
@@ -35,6 +36,8 @@ if st.button("Get Charging Advice") and zip_code and utility_company:
         Based on current TOU rates, regional grid demand patterns, and common utility programs, give the best 2-3 hour window to charge their EV for lowest cost and grid benefit.
 
         Be specific and include:
+        - A generic image of their EV
+        - A regional map with pinpoint of their rough location
         - TOU rate assumptions (based on location)
         - Time window to charge
         - Estimated cost
