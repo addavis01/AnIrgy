@@ -12,9 +12,38 @@ st.title("🔋 AnIrgy EV Charging Advisor")
 
 # Inputs
 zip_code = st.text_input("Enter your ZIP code")
-utility_company = st.text_input("Enter your utility company name")
-make = st.text_input("Car Make", value="Tesla")
-model = st.text_input("Car Model", value="Model 3")
+zip_code = st.text_input("Enter your ZIP Code", value="90210")
+# Utility Provider
+@st.cache_data(show_spinner=False)
+def get_utilities_by_zip(zip_code):
+    url = (
+        f"https://api.openei.org/utility_rates?"
+        f"version=latest&format=json&api_key={os.getenv('OPENEI_API_KEY')}"
+        f"&zip={zip_code}"
+    )
+    response = requests.get(url).json()
+    utilities = sorted(list({item["utility"] for item in response.get("items", [])}))
+    return utilities
+
+if zip_code:
+    utilities = get_utilities_by_zip(zip_code)
+    if utilities:
+        utility_company = st.selectbox("Select Your Utility Provider", utilities)
+    else:
+        st.warning("⚠️ No utilities found for that ZIP.")
+        utility_company = ""
+
+make = st.selectbox("Select EV Make", get_ev_makes())
+
+# EV Model Dropdown based on Make ---
+@st.cache_data(show_spinner=False)
+def get_models_for_make(make):
+    url = f"https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/{make}?format=json"
+    response = requests.get(url).json()
+    models = sorted(list({item["Model_Name"] for item in response["Results"]}))
+    return models
+
+model = st.selectbox("Select Model", get_models_for_make(make))
 battery_kwh = st.slider("How many kWh do you need to charge?", 10, 100, 30)
 charging_rate = st.number_input("Charging rate (kW)", value=11.5)
 # rate_off_peak = st.number_input("Off-Peak rate ($/kWh)", value=0.15)
@@ -43,7 +72,7 @@ osm_map_url = f"https://staticmap.openstreetmap.de/staticmap.php?center={zip_cod
 st.image(osm_map_url, caption=f"Map for ZIP {zip_code}")
 
 # Utility Rate Placeholder
-st.markdown("### 💡 Utility Rate Lookup via OpenEI")
+st.markdown("💡 Utility Rate Lookup via OpenEI")
 openei_api_key = os.getenv("OPENEI_API_KEY")
 
 @st.cache_data(show_spinner=False)
