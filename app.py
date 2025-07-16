@@ -11,7 +11,6 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 st.title("🔋 AnIrgy EV Charging Advisor")
 
 # Inputs
-zip_code = st.text_input("Enter your ZIP code")
 zip_code = st.text_input("Enter your ZIP Code", value="90210")
 # Utility Provider
 @st.cache_data(show_spinner=False)
@@ -33,9 +32,17 @@ if zip_code:
         st.warning("⚠️ No utilities found for that ZIP.")
         utility_company = ""
 
+# EV Make Dropdown
+@st.cache_data(show_spinner=False)
+def get_ev_makes():
+    url = "https://vpic.nhtsa.dot.gov/api/vehicles/GetAllMakes?format=json"
+    response = requests.get(url).json()
+    makes = sorted([item["Make_Name"] for item in response["Results"]])
+    return makes
+
 make = st.selectbox("Select EV Make", get_ev_makes())
 
-# EV Model Dropdown based on Make ---
+# EV Model Dropdown based on Make
 @st.cache_data(show_spinner=False)
 def get_models_for_make(make):
     url = f"https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/{make}?format=json"
@@ -44,6 +51,7 @@ def get_models_for_make(make):
     return models
 
 model = st.selectbox("Select Model", get_models_for_make(make))
+
 battery_kwh = st.slider("How many kWh do you need to charge?", 10, 100, 30)
 charging_rate = st.number_input("Charging rate (kW)", value=11.5)
 # rate_off_peak = st.number_input("Off-Peak rate ($/kWh)", value=0.15)
