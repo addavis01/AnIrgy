@@ -154,7 +154,7 @@ if st.button("Get Charging Advice") and zip_code and utility_company:
         Be specific and include:
         - A generic image of their EV
         - A regional map with pinpoint of their rough location
-        - TOU rate assumptions (based on location)
+        - TOU rate assumptions (based on location); include estimate rates that would be closest to what the chosen utility would have
         - Time window to charge in this format:
             Start Time: HH:MM (24-hour format)
             Duration (hours): X.XX
