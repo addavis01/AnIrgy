@@ -182,11 +182,11 @@ if st.button("Get Charging Advice") and zip_code and utility_company:
     start_time_str, duration_hrs = extract_start_and_duration(gpt_output)
     
     # --- Fallback to user input if needed ---
-    #if not start_time_str or not duration_hrs:
-        #st.warning("⚠️ GPT did not return structured output. Please enter charging time manually.")
-        #start_time_input = st.time_input("Charging start time", value=datetime.strptime("00:00", "%H:%M").time())
-        #start_time_str = start_time_input.strftime("%H:%M")
-        #duration_hrs = st.number_input("Charging duration (hours)", min_value=0.5, max_value=8.0, step=0.25, value=2.5)
+    if not start_time_str or not duration_hrs:
+        st.warning("⚠️ GPT did not return structured output. Please enter charging time manually.")
+        start_time_input = st.time_input("Charging start time", value=datetime.strptime("00:00", "%H:%M").time())
+        start_time_str = start_time_input.strftime("%H:%M")
+        duration_hrs = st.number_input("Charging duration (hours)", min_value=0.5, max_value=8.0, step=0.25, value=2.5)
     
     # --- Generate Charging Chart ---
     st.markdown("📈 Estimated Charging Curve")
