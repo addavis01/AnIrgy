@@ -151,7 +151,7 @@ if st.button("Get Charging Advice") and zip_code and utility_company:
 
         Based on current TOU rates, regional grid demand patterns, and common utility programs, give the best 2-3 hour window to charge their EV for lowest cost and grid benefit.
 
-        Be specific and include:
+        Be specific but concise and include:
         - A generic image of their EV
         - A regional map with pinpoint of their rough location
         - TOU rate assumptions (based on location); include estimate rates that would be closest to what the chosen utility would have
@@ -159,9 +159,7 @@ if st.button("Get Charging Advice") and zip_code and utility_company:
             Start Time: HH:MM (24-hour format)
             Duration (hours): X.XX
         - Estimated cost
-        - Any relevant tips (e.g., solar, rebates, off-peak savings)
-        - A secondary option
-        - A brief explanation
+        
 """
 
     client = openai.OpenAI()
@@ -182,11 +180,11 @@ gpt_output = response.choices[0].message.content
 start_time_str, duration_hrs = extract_start_and_duration(gpt_output)
 
 # --- Fallback to user input if needed ---
-if not start_time_str or not duration_hrs:
-    st.warning("⚠️ GPT did not return structured output. Please enter charging time manually.")
-    start_time_input = st.time_input("Charging start time", value=datetime.strptime("00:00", "%H:%M").time())
-    start_time_str = start_time_input.strftime("%H:%M")
-    duration_hrs = st.number_input("Charging duration (hours)", min_value=0.5, max_value=8.0, step=0.25, value=2.5)
+#if not start_time_str or not duration_hrs:
+    #st.warning("⚠️ GPT did not return structured output. Please enter charging time manually.")
+    #start_time_input = st.time_input("Charging start time", value=datetime.strptime("00:00", "%H:%M").time())
+    #start_time_str = start_time_input.strftime("%H:%M")
+    #duration_hrs = st.number_input("Charging duration (hours)", min_value=0.5, max_value=8.0, step=0.25, value=2.5)
 
 # --- Generate Charging Chart ---
 st.markdown("📈 Estimated Charging Curve")
