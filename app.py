@@ -2,6 +2,10 @@ import streamlit as st
 import openai
 import os
 import requests
+import matplotlib.pyplot as plt
+import numpy as np
+import re
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 # Load API key
@@ -109,6 +113,19 @@ if rate_info and "error" not in rate_info:
 else:
     st.warning("⚠️ Could not find utility rate info for this provider.")
 
+# --- Extract structured output from GPT response ---
+def extract_start_and_duration(gpt_text):
+    try:
+        start_match = re.search(r"Start Time:\s*([0-2]?[0-9]:[0-5][0-9])", gpt_text)
+        duration_match = re.search(r"Duration\s*\(hours\):\s*([\d\.]+)", gpt_text)
+
+        start_time = start_match.group(1) if start_match else None
+        duration = float(duration_match.group(1)) if duration_match else None
+
+        return start_time, duration
+    except Exception:
+        return None, None
+
 # Button
 if st.button("Get Charging Advice") and zip_code and utility_company:
     with st.spinner("Analyzing based on real utility data..."):
@@ -135,11 +152,12 @@ if st.button("Get Charging Advice") and zip_code and utility_company:
         Based on current TOU rates, regional grid demand patterns, and common utility programs, give the best 2-3 hour window to charge their EV for lowest cost and grid benefit.
 
         Be specific and include:
-        - A chart with x- axis reprsenting hours in the day from midnight to midnight and y-axis representing vehicle charging %
         - A generic image of their EV
         - A regional map with pinpoint of their rough location
         - TOU rate assumptions (based on location)
-        - Time window to charge
+        - Time window to charge in this format:
+            Start Time: HH:MM (24-hour format)
+            Duration (hours): X.XX
         - Estimated cost
         - Any relevant tips (e.g., solar, rebates, off-peak savings)
         - A secondary option
@@ -156,3 +174,45 @@ if st.button("Get Charging Advice") and zip_code and utility_company:
     )
     st.markdown("🔋Here is your certified AnIrgy Charging Recommendation")
     st.write(response.choices[0].message.content)
+    
+      # --- Try to extract charging window ---
+        start_time_str, duration_hrs = extract_start_and_duration(gpt_output)
+
+        # --- Fallback to user input if needed ---
+        if not start_time_str or not duration_hrs:
+            st.warning("⚠️ GPT did not return structured output. Please enter charging time manually.")
+            start_time_input = st.time_input("Charging start time", value=datetime.strptime("00:00", "%H:%M").time())
+            start_time_str = start_time_input.strftime("%H:%M")
+            duration_hrs = st.number_input("Charging duration (hours)", min_value=0.5, max_value=8.0, step=0.25, value=2.5)
+
+        # --- Generate Charging Chart ---
+        st.markdown("### 📈 Estimated Charging Curve")
+
+        start_dt = datetime.strptime(start_time_str, "%H:%M")
+        end_dt = start_dt + timedelta(hours=duration_hrs)
+
+        hours = [datetime.strptime("00:00", "%H:%M") + timedelta(hours=i) for i in range(25)]
+        hour_labels = [dt.strftime("%H:%M") for dt in hours]
+
+        percent_per_hour = (battery_kwh / (charging_rate * duration_hrs)) * (100) / duration_hrs
+        battery_percentage = []
+
+        for t in hours:
+            if start_dt <= t <= end_dt:
+                pct = (t - start_dt).seconds / 3600 * percent_per_hour
+                battery_percentage.append(min(pct, 100))
+            elif t > end_dt:
+                battery_percentage.append(battery_percentage[-1])
+            else:
+                battery_percentage.append(0)
+
+        fig, ax = plt.subplots(figsize=(10, 4))
+        ax.plot(hour_labels, battery_percentage, marker='o')
+        ax.set_xticks(hour_labels[::2])
+        ax.set_ylim(0, 100)
+        ax.set_ylabel("Battery %")
+        ax.set_xlabel("Time of Day")
+        ax.set_title("🔋 Charging Curve")
+        ax.grid(True)
+
+        st.pyplot(fig)
