@@ -178,44 +178,45 @@ if st.button("Get Charging Advice") and zip_code and utility_company:
     
     gpt_output = response.choices[0].message.content
     
-# --- Try to extract charging window ---
-start_time_str, duration_hrs = extract_start_and_duration(gpt_output)
-
-# --- Fallback to user input if needed ---
-#if not start_time_str or not duration_hrs:
-    #st.warning("⚠️ GPT did not return structured output. Please enter charging time manually.")
-    #start_time_input = st.time_input("Charging start time", value=datetime.strptime("00:00", "%H:%M").time())
-    #start_time_str = start_time_input.strftime("%H:%M")
-    #duration_hrs = st.number_input("Charging duration (hours)", min_value=0.5, max_value=8.0, step=0.25, value=2.5)
-
-# --- Generate Charging Chart ---
-st.markdown("📈 Estimated Charging Curve")
-
-start_dt = datetime.strptime(start_time_str, "%H:%M")
-end_dt = start_dt + timedelta(hours=duration_hrs)
-
-hours = [datetime.strptime("00:00", "%H:%M") + timedelta(hours=i) for i in range(25)]
-hour_labels = [dt.strftime("%H:%M") for dt in hours]
-
-percent_per_hour = (battery_kwh / (charging_rate * duration_hrs)) * (100) / duration_hrs
-battery_percentage = []
-
-for t in hours:
-    if start_dt <= t <= end_dt:
-        pct = (t - start_dt).seconds / 3600 * percent_per_hour
-        battery_percentage.append(min(pct, 100))
-    elif t > end_dt:
-        battery_percentage.append(battery_percentage[-1])
-    else:
-        battery_percentage.append(0)
-
-fig, ax = plt.subplots(figsize=(10, 4))
-ax.plot(hour_labels, battery_percentage, marker='o')
-ax.set_xticks(hour_labels[::2])
-ax.set_ylim(0, 100)
-ax.set_ylabel("Battery %")
-ax.set_xlabel("Time of Day")
-ax.set_title("🔋 Charging Curve")
-ax.grid(True)
-
-st.pyplot(fig)
+    # --- Try to extract charging window ---
+    start_time_str, duration_hrs = extract_start_and_duration(gpt_output)
+    
+    # --- Fallback to user input if needed ---
+    #if not start_time_str or not duration_hrs:
+        #st.warning("⚠️ GPT did not return structured output. Please enter charging time manually.")
+        #start_time_input = st.time_input("Charging start time", value=datetime.strptime("00:00", "%H:%M").time())
+        #start_time_str = start_time_input.strftime("%H:%M")
+        #duration_hrs = st.number_input("Charging duration (hours)", min_value=0.5, max_value=8.0, step=0.25, value=2.5)
+    
+    # --- Generate Charging Chart ---
+    st.markdown("📈 Estimated Charging Curve")
+    
+    start_dt = datetime.strptime(start_time_str, "%H:%M")
+    end_dt = start_dt + timedelta(hours=duration_hrs)
+    
+    hours = [datetime.strptime("00:00", "%H:%M") + timedelta(hours=i) for i in range(25)]
+    hour_labels = [dt.strftime("%H:%M") for dt in hours]
+    
+    percent_per_hour = (battery_kwh / (charging_rate * duration_hrs)) * (100) / duration_hrs
+    battery_percentage = []
+    
+    for t in hours:
+        if start_dt <= t <= end_dt:
+            pct = (t - start_dt).seconds / 3600 * percent_per_hour
+            battery_percentage.append(min(pct, 100))
+        elif t > end_dt:
+            battery_percentage.append(battery_percentage[-1])
+        else:
+            battery_percentage.append(0)
+    
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.plot(hour_labels, battery_percentage, marker='o')
+    ax.set_xticks(hour_labels[::2])
+    ax.set_ylim(0, 100)
+    ax.set_ylabel("Battery %")
+    ax.set_xlabel("Time of Day")
+    ax.set_title("🔋 Charging Curve")
+    ax.grid(True)
+    
+    st.pyplot(fig)
+    
