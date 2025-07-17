@@ -44,7 +44,7 @@ def get_ev_makes():
     makes = sorted([item["Make_Name"] for item in response["Results"]])
     return makes
 
-make = st.selectbox("Select EV Make", get_ev_makes())
+make = st.selectbox("Select EV Make", get_ev_makes(), index=get_ev_makes().index("CADILLAC") if "CADILLAC" in get_ev_makes() else 0)
 
 # EV Model Dropdown based on Make
 @st.cache_data(show_spinner=False)
@@ -54,7 +54,9 @@ def get_models_for_make(make):
     models = sorted(list({item["Model_Name"] for item in response["Results"]}))
     return models
 
-model = st.selectbox("Select Model", get_models_for_make(make))
+default_models = get_models_for_make(make)
+model_default_index = default_models.index("LYRIQ") if "LYRIQ" in default_models else 0
+model = st.selectbox("Select Model", default_models, index=model_default_index)
 
 battery_kwh = st.slider("How many kWh do you need to charge?", 10, 100, 30)
 charging_rate = st.number_input("Charging rate (kW)", value=11.5)
