@@ -135,6 +135,7 @@ if st.button("Get Charging Advice") and zip_code and utility_company:
         Based on current TOU rates, regional grid demand patterns, and common utility programs, give the best 2-3 hour window to charge their EV for lowest cost and grid benefit.
 
         Be specific and include:
+        - A chart with x- axis reprsenting hours in the day from midnight to midnight and y-axis representing vehicle charging %
         - A generic image of their EV
         - A regional map with pinpoint of their rough location
         - TOU rate assumptions (based on location)
