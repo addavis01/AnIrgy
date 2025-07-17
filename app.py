@@ -176,7 +176,7 @@ if st.button("Get Charging Advice") and zip_code and utility_company:
     gpt_output = response.choices[0].message.content
     st.write(gpt_output)
     
-gpt_output = response.choices[0].message.content
+    gpt_output = response.choices[0].message.content
     
 # --- Try to extract charging window ---
 start_time_str, duration_hrs = extract_start_and_duration(gpt_output)
